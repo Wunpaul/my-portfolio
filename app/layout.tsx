@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-[#F5F2EB] text-slate-900 antialiased`}>
+      <body className={`${inter.className} bg-[#F5F2EB] bg-[radial-gradient(#cbd5e1_1.5px,transparent_1.5px)] [background-size:24px_24px] bg-fixed text-slate-900 antialiased`}>
         
         {/* The Navbar sits at the top */}
         <Navbar /> 

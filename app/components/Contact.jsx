@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 const Contact = () => {
+  // We only need one state variable to handle the message text
   const [result, setResult] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -13,30 +14,45 @@ const Contact = () => {
     
     const formData = new FormData(event.target);
 
-    // Your active Web3Forms key is safely kept here
-    formData.append("access_key", "b4089249-e165-43de-abff-bf321b0e86ed"); 
+    // Spam-prevention metadata
+    formData.append("subject", "New Contact Form Submission - Portfolio");
+    formData.append("from_name", "Portfolio Automated Server");
+    // Safely pull the key from your .env.local file
+    formData.append("access_key", process.env.NEXT_PUBLIC_WEB3FORMS_KEY); 
 
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      body: formData
-    });
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (data.success) {
-      setResult("Message Sent Successfully!");
-      event.target.reset(); // Clear the form
-    } else {
-      console.log("Error", data);
-      setResult(data.message);
+      if (data.success) {
+        setResult("Message Sent Successfully! I'll get back to you soon.");
+        event.target.reset(); // Clear the form
+        
+        // FIX: We now clear the 'result' state after 5 seconds
+        setTimeout(() => {
+          setResult('');
+        }, 5000);
+      } else {
+        console.log("Error", data);
+        setResult(data.message);
+      }
+    } catch (error) {
+      console.error("Submission Error:", error);
+      setResult("Something went wrong. Please check your internet connection.");
+    } finally {
+      // This ensures the button re-enables whether it succeeds or fails
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
     <section id="contact" className="pt-32 pb-20 px-6 max-w-2xl mx-auto scroll-mt-24">
       
-      {/* Header locked to text-slate-900 */}
+      {/* Header */}
       <h2 className="text-3xl font-bold text-center text-slate-900 mb-8">
         Get In Touch
       </h2>
@@ -44,7 +60,7 @@ const Contact = () => {
         I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
       </p>
 
-      {/* The Form - Clean white background to pop off the warm page */}
+      {/* The Form */}
       <form onSubmit={onSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow-md border border-slate-200">
         
         {/* Name Input */}
@@ -55,7 +71,7 @@ const Contact = () => {
             name="name" 
             required 
             placeholder="John Doe"
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition resize-none"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
           />
         </div>
 
@@ -67,7 +83,7 @@ const Contact = () => {
             name="email" 
             required 
             placeholder="john@example.com"
-            className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition resize-none"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
           />
         </div>
 
@@ -94,7 +110,7 @@ const Contact = () => {
 
         {/* Success/Error Message */}
         {result && (
-          <p className={`text-center text-sm font-medium mt-4 ${result.includes("Success") ? "text-green-600" : "text-red-600"}`}>
+          <p className={`text-center text-sm font-medium mt-4 ${result.includes("Successfully") ? "text-green-600" : "text-red-600"}`}>
             {result}
           </p>
         )}
